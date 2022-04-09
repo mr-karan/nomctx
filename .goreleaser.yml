@@ -1,0 +1,23 @@
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
+
+builds:
+  - binary: nomctx
+    id: nomctx
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X "main.buildString={{ .Tag }} ({{ .ShortCommit }} {{ .Date }})"
+    dir: ./cmd/
+
+archives:
+  - format: tar.gz
+    files:
+      - README.md
+      - LICENSE
+      - config.sample.hcl
