@@ -11,7 +11,7 @@ func handleListNamespaces(cfg Config) {
 	if err != nil {
 		log.Fatalf("error listing namespace: %s", err.Error())
 	}
-	fmt.Fprintf(os.Stdout, "%s", ns)
+	fmt.Fprintf(os.Stdout, "%s\n", ns)
 	os.Exit(0)
 }
 

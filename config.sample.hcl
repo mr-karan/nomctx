@@ -1,13 +1,30 @@
-clusters "dev" {
-  address   = "http://10.0.0.1:4646"
-  http_auth = "user:pass"
-  namespace = "default"
-  region    = "abc"
-  token     = "26a57a4c-1fe4-4220-a60b-576ea637100a"
-}
-
-clusters "prod" {
+clusters "local" {
   address   = "http://127.0.0.1:4646"
   namespace = "default"
-  token     = "f8cb5774-749a-4548-acc9-054df3b52e83"
+}
+
+clusters "bangalore" {
+  address   = "http://10.0.0.1:4646"
+  http_auth = "user:pass"
+  namespace = "pink"
+  token     = "c0a7d714-46df-4c6e-954a-269578c3804d"
+}
+
+clusters "tokyo" {
+  address   = "http://10.0.0.2:4646"
+  namespace = "purple"
+  token     = "08d63db2-b630-43c3-b614-6b7a6a553187"
+}
+
+clusters "paris" {
+  address   = "http://10.0.0.3:4646"
+  namespace = "blue"
+  region    = "paris"
+  token     = "f7a50344-67ab-4b6c-bf10-14f31ccba025"
+}
+
+clusters "singapore" {
+  address   = "http://10.0.0.4:4646"
+  namespace = "yellow"
+  token     = "efb54871-b56e-4516-a70e-dee5c3bbf102"
 }
