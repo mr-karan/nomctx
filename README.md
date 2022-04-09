@@ -1,6 +1,6 @@
 # nomctx
 
-Faster way to switch between Nomad clusters and namespaces. Inspired from [kubectx](https://github.com/ahmetb/kubectx/).
+Faster way to switch between [Nomad](https://www.nomadproject.io/) clusters and namespaces. Inspired from [kubectx](https://github.com/ahmetb/kubectx/).
 
 ![nomctx cluster switching GIF](img/nomctx_clusters.gif)
 
@@ -26,7 +26,8 @@ By default `nomctx` searches for the file in `~/.nomctx/config.hcl` but you can 
 ## Usage
 
 ```bash
-nomctx --help           
+nomctx --help  
+
       --config string          Path to a config file to load. (default "~/.nomctx/config.hcl")
       --list-clusters          List all clusters
       --list-namespaces        List all namespaces
@@ -39,12 +40,16 @@ nomctx --help
 
 ### Interactive Mode
 
-If you have `fzf` installed, the tool will show an interactive prompt for switching `clusters` or `namespace`:
+If you have [`fzf`](https://github.com/junegunn/fzf) installed, the tool will show an interactive prompt for switching `clusters` or `namespace`.
+
+![nomctx cluster screenshot](img/nomctx_clusters.png)
+
+![nomctx namespace screenshot](img/nomctx_namespaces.png)
 
 
 ### Non Interactive Mode
 
-If you don't have `fzf`, you can use `list-*` and `set-*` commands.
+If you don't have `fzf`, you can use switch manually with `set-cluster=<>` and `set-namespace=<>` commands.
 
 #### List all clusters
 
@@ -120,3 +125,6 @@ clusters "prod" {
 }
 ```
 
+## LICENSE
+
+See [LICENSE](./LICENSE)
