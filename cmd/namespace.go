@@ -2,18 +2,29 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 )
 
 func listNamespaces(cfg Config) (string, error) {
-	output, err := exec.Command("nomad", "namespace", "list", "-t", "'{{range .}}{{printf \"%s\\n\" .Name}}{{end}}'").CombinedOutput()
+	output, err := exec.Command("nomad", "namespace", "list", "-t", "{{range .}}{{printf \"%s\\n\" .Name}}{{end}}").CombinedOutput()
 	if err != nil {
 		return "", err
 	}
+	return strings.TrimSpace(string(output)), nil
+}
 
-	return string(output), nil
+// Checks the status of namespace, whether it exists or not.
+func lookupNamespace(ns string) bool {
+	output, err := exec.Command("nomad", "namespace", "status", ns).CombinedOutput()
+	if err != nil {
+		if strings.Contains(string(output), fmt.Sprintf("Namespace \"%s\" matched no namespaces", ns)) {
+			return false
+		}
+	}
+	return true
 }
 
 // Wraps around `nomad namespace list` around `fzf` to show a prompt for list of namespaces to switch.

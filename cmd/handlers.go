@@ -21,6 +21,12 @@ func handleListClusters(cfg Config) {
 }
 
 func handleSetNamespace() {
+	ns := ko.String("set-namespace")
+	exists := lookupNamespace(ns)
+	if !exists {
+		log.Fatalf("error retrieving namespaces: %s does not exist", ns)
+	}
+
 	exportNamespace(ko.String("set-namespace"), os.Stdout)
 	os.Exit(0)
 }
