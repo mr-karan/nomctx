@@ -17,7 +17,7 @@ func lookupCluster(name string, cfg Config) (Cluster, error) {
 
 // Emits `export` commands on shell.
 func exportClusterVars(c Cluster, out io.Writer) {
-	fmt.Fprintf(out, "export NOMAD_ADDRESS=%s\n", c.Address)
+	fmt.Fprintf(out, "export NOMAD_ADDR=%s\n", c.Address)
 	if c.Token != "" {
 		fmt.Fprintf(out, "export NOMAD_TOKEN=%s\n", c.Token)
 	}

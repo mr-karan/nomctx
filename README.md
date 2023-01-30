@@ -78,7 +78,7 @@ default
 
 ```bash
 nomctx --set-cluster=bangalore
-export NOMAD_ADDRESS=http://10.0.0.1:4646
+export NOMAD_ADDR=http://10.0.0.1:4646
 export NOMAD_TOKEN=f8cb5774-749a-4548-acc9-054df3b52e83
 export NOMAD_HTTP_AUTH=user:pass
 export NOMAD_NAMESPACE=pink
@@ -102,7 +102,7 @@ eval $(nomctx)
 
 # You can see the env variables are automatically exported on shell.
 env | grep NOMAD_
-NOMAD_ADDRESS=http://10.0.0.1:4646
+NOMAD_ADDR=http://10.0.0.1:4646
 NOMAD_TOKEN=c0a7d714-46df-4c6e-954a-269578c3804d
 NOMAD_NAMESPACE=pink
 NOMAD_HTTP_AUTH=user:pass
