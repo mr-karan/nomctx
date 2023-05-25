@@ -19,3 +19,5 @@ config.hcl
 bin/
 data/
 dist/
+
+dist/

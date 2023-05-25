@@ -1,6 +1,6 @@
 module github.com/mr-karan/nomctx
 
-go 1.20
+go 1.18
 
 require (
 	github.com/hashicorp/hcl/v2 v2.16.2
