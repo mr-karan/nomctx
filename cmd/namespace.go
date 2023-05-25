@@ -1,49 +1,58 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-func listNamespaces(cfg Config) (string, error) {
+// setNamespace sets the namespace provided in the current context.
+func setNamespace(ns string) error {
+	ok, err := lookupNamespace(ns)
+	if err != nil {
+		return fmt.Errorf("failed to lookup namespace: %w", err)
+	}
+	if !ok {
+		return fmt.Errorf("namespace %s does not exist", ns)
+	}
+
+	// Load current context.
+	context, err := loadContext()
+	if err != nil {
+		return fmt.Errorf("failed to load context: %w", err)
+	}
+
+	// Update the context.
+	context.Namespace = ns
+	if err := persistContext(context); err != nil {
+		return fmt.Errorf("failed to persist context: %w", err)
+	}
+
+	// Output the export command.
+	fmt.Fprintf(os.Stdout, "export %s=%s\n", "NOMAD_NAMESPACE", ns)
+
+	return nil
+}
+
+// listNamespaces returns a list of namespaces.
+func listNamespaces() ([]string, error) {
 	output, err := exec.Command("nomad", "namespace", "list", "-t", "{{range .}}{{printf \"%s\\n\" .Name}}{{end}}").CombinedOutput()
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to list namespaces, error: %v, output: %s", err, output)
 	}
-	return strings.TrimSpace(string(output)), nil
+	namespaces := strings.Split(strings.TrimSpace(string(output)), "\n")
+	return namespaces, nil
 }
 
 // Checks the status of namespace, whether it exists or not.
-func lookupNamespace(ns string) bool {
+func lookupNamespace(ns string) (bool, error) {
 	output, err := exec.Command("nomad", "namespace", "status", ns).CombinedOutput()
 	if err != nil {
 		if strings.Contains(string(output), fmt.Sprintf("Namespace \"%s\" matched no namespaces", ns)) {
-			return false
+			return false, nil
 		}
+		return false, fmt.Errorf("failed to check namespace status, error: %v, output: %s", err, output)
 	}
-	return true
-}
-
-// Wraps around `nomad namespace list` around `fzf` to show a prompt for list of namespaces to switch.
-// Returns the namespace selected by user.
-func switchNamespace() (string, error) {
-	var (
-		cmd = exec.Command("fzf", "--ansi", "--no-preview")
-		out bytes.Buffer
-	)
-
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = &out
-
-	// os.Args[0] is the current program. It basically is doing the equivalent of `nomctx --list | fzf`.
-	cmd.Env = append(os.Environ(), "FZF_DEFAULT_COMMAND=nomad namespace list -t  '{{range .}}{{printf \"%s\\n\" .Name}}{{end}}'")
-	if err := cmd.Run(); err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(out.String()), nil
+	return true, nil
 }
