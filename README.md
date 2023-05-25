@@ -57,9 +57,9 @@ GLOBAL OPTIONS:
 
 If you have [`fzf`](https://github.com/junegunn/fzf) installed, the tool will show an interactive prompt for switching `clusters` or `namespace`.
 
-![nomctx cluster img](img/nomctx_clusters.png)
+![nomctx cluster img](assets/nomctx_clusters.png)
 
-![nomctx namespace img](img/nomctx_namespaces.png)
+![nomctx namespace img](assets/nomctx_namespaces.png)
 
 
 ### Login with SSO
