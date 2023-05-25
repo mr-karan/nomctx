@@ -1,41 +1,106 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
-	"strings"
+	"path/filepath"
 )
 
-func listClusters(cfg Config, stdout io.Writer) {
-	for _, cluster := range cfg.Clusters {
-		for name := range cluster {
-			fmt.Fprintf(stdout, "%s\n", name)
-		}
+func setCluster(cluster ClusterCfg, persist bool) error {
+	// Persist the context.
+	context := ContextCfg{
+		Cluster:   cluster.Name,
+		Namespace: "default",
 	}
+	if err := persistContext(context); err != nil {
+		return fmt.Errorf("error persisting context: %w", err)
+	}
+
+	// Print the env variables to stdout or persist them to a file.
+	if persist {
+		basePath, err := getFilePathInHomeDir("")
+		if err != nil {
+			return err
+		}
+
+		// Persist the environment variables.
+		return persistClusterVarsFile(cluster, basePath)
+	}
+
+	// If --persist is not passed, just print the env variables to stdout.
+	exportClusterVars(cluster, os.Stdout)
+	return nil
 }
 
-// Wraps around `nomctx` around `fzf` to show a prompt for list of clusters to switch.
-// Returns the cluster selected by user.
-func switchCluster() (string, error) {
-	var (
-		cmd = exec.Command("fzf", "--ansi", "--no-preview")
-		out bytes.Buffer
-	)
+func listClusters(cfg Config) []string {
+	clusters := make([]string, 0, len(cfg.Clusters))
+	for _, c := range cfg.Clusters {
+		clusters = append(clusters, c.Name)
+	}
+	return clusters
+}
 
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = &out
+// Returns the metadata for a particular cluster.
+func lookupCluster(name string, clusters []ClusterCfg) (ClusterCfg, error) {
+	for _, c := range clusters {
+		if c.Name == name {
+			return c, nil
+		}
+	}
+	return ClusterCfg{}, fmt.Errorf("no cluster with name %s found", name)
+}
 
-	// os.Args[0] is the current program. It basically is doing the equivalent of `nomctx --list | fzf`.
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("FZF_DEFAULT_COMMAND=%s --config %s --list-clusters", os.Args[0], ko.String("config")))
-
-	if err := cmd.Run(); err != nil {
-		return "", err
+// Emits `export` commands on shell.
+func exportClusterVars(c ClusterCfg, out io.Writer) {
+	printIfNotEmpty := func(varName, value string) {
+		if value != "" {
+			fmt.Fprintf(out, "export %s=%s\n", varName, value)
+		}
 	}
 
-	return strings.TrimSpace(out.String()), nil
+	printIfNotEmpty("NOMAD_ADDR", c.Address)
+	printIfNotEmpty("NOMAD_TOKEN", c.Token)
+	printIfNotEmpty("NOMAD_HTTP_AUTH", c.HTTPAuth)
+	printIfNotEmpty("NOMAD_REGION", c.Region)
+	printIfNotEmpty("NOMAD_NAMESPACE", c.Namespace)
+}
+
+// persistClusterVars writes the cluster variables to a file
+func persistClusterVars(c ClusterCfg, path string) error {
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	fmt.Fprintf(file, "NOMAD_ADDR=%s\n", c.Address)
+	if c.Token != "" {
+		fmt.Fprintf(file, "NOMAD_TOKEN=%s\n", c.Token)
+	}
+	if c.HTTPAuth != "" {
+		fmt.Fprintf(file, "NOMAD_HTTP_AUTH=%s\n", c.HTTPAuth)
+	}
+	if c.Region != "" {
+		fmt.Fprintf(file, "NOMAD_REGION=%s\n", c.Region)
+	}
+	if c.Namespace != "" {
+		fmt.Fprintf(file, "NOMAD_NAMESPACE=%s\n", c.Namespace)
+	}
+
+	return nil
+}
+
+// persistClusterVarsFile persists the cluster variables to a file.
+func persistClusterVarsFile(cluster ClusterCfg, basePath string) error {
+	sanitizedClusterName := sanitizeFilename(cluster.Name)
+	filePath := filepath.Join(basePath, sanitizedClusterName+".env")
+
+	// Ensure that the directory exists.
+	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+		return err
+	}
+
+	// Persist the environment variables.
+	return persistClusterVars(cluster, filePath)
 }

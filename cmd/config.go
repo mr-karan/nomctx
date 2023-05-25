@@ -1,26 +1,44 @@
 package main
 
 import (
-	"github.com/knadh/koanf"
-	"github.com/knadh/koanf/parsers/hcl"
-	"github.com/knadh/koanf/providers/file"
+	"fmt"
+
+	"github.com/hashicorp/hcl/v2/hclsimple"
 )
 
+type ClusterCfg struct {
+	Name      string   `hcl:",label"`
+	Address   string   `hcl:"address"`
+	Namespace string   `hcl:"namespace,optional"`
+	Region    string   `hcl:"region,optional"`
+	HTTPAuth  string   `hcl:"http_auth,optional"`
+	Token     string   `hcl:"token,optional"`
+	Auth      *AuthCfg `hcl:"auth,block"`
+}
+
+type AuthCfg struct {
+	Method   string `hcl:"method"`
+	Provider string `hcl:"provider"`
+}
+
+// ContextCfg is the data structure for storing the currently active context.
+type ContextCfg struct {
+	Cluster   string `hcl:"cluster"`
+	Namespace string `hcl:"namespace"`
+}
+
+type Config struct {
+	Clusters []ClusterCfg `hcl:"cluster,block"`
+}
+
 // initConfig parses the config file and loads in `Config` object.
-func initConfig(ko *koanf.Koanf, cfgPath string) (Config, error) {
+func initConfig(cfgPath string) (Config, error) {
 	var (
 		cfg Config
 	)
 
-	// Load the config files from the path provided.
-	err := ko.Load(file.Provider(cfgPath), hcl.Parser(false))
-	if err != nil {
-		return cfg, err
-	}
-
-	err = ko.Unmarshal("", &cfg)
-	if err != nil {
-		return cfg, err
+	if err := hclsimple.DecodeFile(cfgPath, nil, &cfg); err != nil {
+		return cfg, fmt.Errorf("error loading config file %s: %w", cfgPath, err)
 	}
 
 	return cfg, nil

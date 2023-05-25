@@ -5,92 +5,128 @@ import (
 	"log"
 	"os"
 
-	"github.com/knadh/koanf"
-	"github.com/knadh/koanf/providers/posflag"
-	flag "github.com/spf13/pflag"
+	"github.com/urfave/cli/v2"
+)
+
+const (
+	DEFAULT_CONFIG_FILE = "config.hcl"
 )
 
 var (
 	// Version of the build. This is injected at build-time.
-	buildString = "unknown"
-	ko          = koanf.New(".")
+	buildString           = "unknown"
+	defaultConfigFilePath string
 )
 
-type Config struct {
-	Clusters []map[string][]Cluster `koanf:"clusters"`
-}
+func init() {
+	path, err := getFilePathInHomeDir(DEFAULT_CONFIG_FILE)
+	if err != nil {
+		log.Fatalf("Failed to get default config file path: %v", err)
+	}
 
-type Cluster struct {
-	Address   string `koanf:"address"`
-	Namespace string `koanf:"namespace"`
-	Region    string `koanf:"region"`
-	Token     string `koanf:"token"`
-	HTTPAuth  string `koanf:"http_auth"`
+	defaultConfigFilePath = path
 }
 
 func main() {
-	f := flag.NewFlagSet("nomctx", flag.ContinueOnError)
-	f.Usage = func() {
-		fmt.Println(f.FlagUsages())
-		os.Exit(0)
+	app := &cli.App{
+		Name:  "nomctx",
+		Usage: "Faster way to switch across multiple Nomad clusters and namespaces",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "config",
+				Value: defaultConfigFilePath,
+				Usage: "Path to a config file to load.",
+			},
+		},
+		Before: func(c *cli.Context) error {
+			cfg, err := initConfig(c.String("config"))
+			if err != nil {
+				return fmt.Errorf("error initialising config: %w", err)
+			}
+			// Set the config in the app metadata.
+			c.App.Metadata["cfg"] = cfg
+			return nil
+		},
+		// Default.
+		Action: func(c *cli.Context) error {
+			if c.Args().Len() == 0 {
+				// No command provided.
+				return handleSwitchCluster(c)
+			}
+			return cli.ShowAppHelp(c)
+		},
+		Commands: []*cli.Command{
+			{
+				Name:   "list-clusters",
+				Usage:  "List all clusters",
+				Action: handleListClusters,
+			},
+			{
+				Name:   "list-namespaces",
+				Usage:  "List all namespaces",
+				Action: handleListNamespaces,
+			},
+			{
+				Name:      "set-cluster",
+				Usage:     "Set the current cluster context",
+				ArgsUsage: "CLUSTER_NAME",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "persist",
+						Usage: "Persist the environment variables to a .env file",
+					},
+				},
+				Action: handleSetCluster,
+			},
+			{
+				Name:      "set-namespace",
+				Usage:     "Set namespace",
+				ArgsUsage: "NAMESPACE",
+				Action:    handleSetNamespace,
+			},
+			{
+				Name:  "switch-cluster",
+				Usage: "Switch cluster",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "persist",
+						Usage: "Persist the environment variables to a .env file",
+					},
+				},
+				Action: handleSwitchCluster,
+			},
+			{
+				Name:   "switch-namespace",
+				Usage:  "Switch namespace",
+				Action: handleSwitchNamespace,
+			},
+			{
+				Name:   "current-context",
+				Usage:  "Display the current context",
+				Action: handleCurrentCtx,
+			},
+			{
+				Name:      "login",
+				Usage:     "Login to a cluster",
+				ArgsUsage: "CLUSTER",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "cluster",
+						Usage: "Name of the cluster to login to",
+					},
+					&cli.BoolFlag{
+						Name:  "persist",
+						Usage: "Persist the environment variables to a .env file",
+					},
+				},
+				Action: handleLogin,
+			},
+		},
+		Version: buildString,
 	}
 
-	// Register flags.
-	f.String("config", getDefaultCfgPath(), "Path to a config file to load.")
-	f.BoolP("version", "v", false, "Show version of nomctx")
-
-	// Cluster commands.
-	f.Bool("switch-cluster", true, "Switch cluster") // Default action.
-	f.Bool("list-clusters", false, "List all clusters")
-	f.String("set-cluster", "", "Set cluster")
-
-	// Namesapce commands.
-	f.Bool("switch-namespace", false, "Switch namespace")
-	f.Bool("list-namespaces", false, "List all namespaces")
-	f.String("set-namespace", "", "Set namespace")
-
-	// Parse and Load Flags.
-	err := f.Parse(os.Args[1:])
-	if err != nil {
-		log.Fatalf("error parsing flags: %v", err)
-	}
-	if err = ko.Load(posflag.Provider(f, ".", ko), nil); err != nil {
-		log.Fatalf("error loading flags: %v", err)
-	}
-
-	// Initialise config.
-	cfg, err := initConfig(ko, ko.String("config"))
-	if err != nil {
-		log.Fatalf("error initialising config: %v", err)
-	}
-
-	// If version flag is set, output version and quit.
-	if ko.Bool("version") {
-		fmt.Printf("%s\n", buildString)
-		os.Exit(0)
-	}
-
-	if ko.Bool("list-clusters") {
-		handleListClusters(cfg)
-	}
-
-	if ko.Bool("list-namespaces") {
-		handleListNamespaces(cfg)
-	}
-
-	if ko.String("set-namespace") != "" {
-		handleSetNamespace()
-	}
-
-	if ko.String("set-cluster") != "" {
-		handleSetCluster(cfg)
-	}
-
-	if ko.Bool("switch-namespace") {
-		handleSwitchNamespace(cfg)
-	}
-
-	if ko.Bool("switch-cluster") {
-		handleSwitchCluster(cfg)
+	if err := app.Run(os.Args); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
 	}
 }
