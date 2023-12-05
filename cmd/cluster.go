@@ -63,7 +63,9 @@ func exportClusterVars(c ClusterCfg, out io.Writer) {
 	printIfNotEmpty("NOMAD_TOKEN", c.Token)
 	printIfNotEmpty("NOMAD_HTTP_AUTH", c.HTTPAuth)
 	printIfNotEmpty("NOMAD_REGION", c.Region)
-	printIfNotEmpty("NOMAD_NAMESPACE", c.Namespace)
+	printIfNotEmpty("NOMAD_CACERT", c.CACert)
+	printIfNotEmpty("NOMAD_CLIENT_CERT", c.ClientCert)
+	printIfNotEmpty("NOMAD_CLIENT_KEY", c.ClientKey)
 }
 
 // persistClusterVars writes the cluster variables to a file
@@ -86,6 +88,15 @@ func persistClusterVars(c ClusterCfg, path string) error {
 	}
 	if c.Namespace != "" {
 		fmt.Fprintf(file, "NOMAD_NAMESPACE=%s\n", c.Namespace)
+	}
+	if c.CACert != "" {
+		fmt.Fprintf(file, "NOMAD_CACERT=%s\n", c.CACert)
+	}
+	if c.ClientCert != "" {
+		fmt.Fprintf(file, "NOMAD_CLIENT_CERT=%s\n", c.ClientCert)
+	}
+	if c.ClientKey != "" {
+		fmt.Fprintf(file, "NOMAD_CLIENT_KEY=%s\n", c.ClientKey)
 	}
 
 	return nil
