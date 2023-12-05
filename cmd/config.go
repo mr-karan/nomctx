@@ -7,13 +7,16 @@ import (
 )
 
 type ClusterCfg struct {
-	Name      string   `hcl:",label"`
-	Address   string   `hcl:"address"`
-	Namespace string   `hcl:"namespace,optional"`
-	Region    string   `hcl:"region,optional"`
-	HTTPAuth  string   `hcl:"http_auth,optional"`
-	Token     string   `hcl:"token,optional"`
-	Auth      *AuthCfg `hcl:"auth,block"`
+	Name       string   `hcl:",label"`
+	Address    string   `hcl:"address"`
+	Namespace  string   `hcl:"namespace,optional"`
+	Region     string   `hcl:"region,optional"`
+	HTTPAuth   string   `hcl:"http_auth,optional"`
+	Token      string   `hcl:"token,optional"`
+	CACert     string   `hcl:"cacert,optional"`
+	ClientCert string   `hcl:"clientcert,optional"`
+	ClientKey  string   `hcl:"clientkey,optional"`
+	Auth       *AuthCfg `hcl:"auth,block"`
 }
 
 type AuthCfg struct {
