@@ -85,12 +85,6 @@ See [Persist variables](#persist-variables) section for more details on how to p
 
 If you don't have `fzf`, you can use switch manually with `set-cluster=<>` and `set-namespace=<>` commands.
 
-#### Add a Cluster
-
-```bash
-nomctx add-cluster --cluster=<name> [--addr=<address>] [--token=<token>] [--namespace=<namespace>] [--region=<region>] [--auth-method=<method>]
-```
-
 #### List all clusters
 
 ```bash
@@ -136,6 +130,37 @@ $ nomctx current-context
 Cluster: local
 Namespace: default
 ```
+
+### Add a Cluster
+
+```bash
+nomctx add-cluster --cluster=<name> [--addr=<address>] [--token=<token>] [--namespace=<namespace>] [--region=<region>] [--auth-method=<method>]
+```
+
+The `add-cluster` command allows you to add a new cluster configuration to your `nomctx` setup. This command is useful for managing multiple Nomad clusters, enabling you to switch between them easily.
+
+#### Parameters
+- `--cluster`: (Required) Name of the new cluster.
+- `--addr`: (Required) Address of the cluster (e.g., `http://127.0.0.1:4646`).
+- `--token`: (Optional) Access token for the cluster.
+- `--namespace`: (Optional) Default namespace for the cluster.
+- `--region`: (Optional) Region of the cluster.
+- `--auth-method`: (Optional) Authentication method for the cluster (e.g., `"github"`).
+
+#### Examples
+Add a new cluster named `my-cluster`:
+```bash
+nomctx add-cluster --cluster="my-cluster" --addr="http://10.0.0.5:4646"
+```
+
+Add a new cluster with complete details:
+```bash
+nomctx add-cluster --cluster="my-cluster" --addr="http://10.0.0.5:4646" --token="abcd1234" --namespace="default" --region="us-west" --auth-method="github"
+```
+
+#### Notes
+- The new cluster configuration is appended to the existing `~/.nomctx/config.hcl` file.
+- Ensure the cluster name is unique to avoid conflicts in the configuration.
 
 ### Persist variables
 
