@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/urfave/cli/v2"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // handleListClusters lists all the configured clusters.
@@ -179,5 +184,94 @@ func handleCurrentCtx(c *cli.Context) error {
 		return fmt.Errorf("failed to load context: %w", err)
 	}
 	fmt.Fprintf(c.App.Writer, "Cluster: %s\nNamespace: %s\n", context.Cluster, context.Namespace)
+	return nil
+}
+
+func handleAddCluster(c *cli.Context) error {
+	// Parse the flags
+	cluster := c.String("cluster")
+	addr := c.String("addr")
+	token := c.String("token")
+	namespace := c.String("namespace")
+	region := c.String("region")
+	authMethod := c.String("auth-method")
+
+	// Read the existing config file as a string
+	configBytes, err := os.ReadFile(defaultConfigFilePath)
+	if err != nil {
+		return fmt.Errorf("unable to read the config file: %v", err)
+	}
+
+	// Use hclparse to check if the cluster already exists
+	parser := hclparse.NewParser()
+	f, diags := parser.ParseHCL(configBytes, defaultConfigFilePath)
+	if diags.HasErrors() {
+		return fmt.Errorf("failed to parse config file: %s", diags.Error())
+	}
+
+	// Prepare the schema for parsing the body content
+	var contentSchema = &hcl.BodySchema{
+		Blocks: []hcl.BlockHeaderSchema{
+			{
+				Type:       "cluster",
+				LabelNames: []string{"name"},
+			},
+		},
+	}
+
+	// Parse the body content of the file
+	content, diags := f.Body.Content(contentSchema)
+	if diags.HasErrors() {
+		return fmt.Errorf("failed to parse body content: %s", diags.Error())
+	}
+
+	// Check if the cluster already exists
+	for _, block := range content.Blocks {
+		if block.Type == "cluster" && len(block.Labels) > 0 && block.Labels[0] == cluster {
+			return fmt.Errorf("cluster '%s' already exists", cluster)
+		}
+	}
+
+	// Parse the config file using hclwrite for modification
+	hclFile, diags := hclwrite.ParseConfig(configBytes, defaultConfigFilePath, hcl.InitialPos)
+	if diags.HasErrors() {
+		return fmt.Errorf("failed to parse config file for writing: %s", diags.Error())
+	}
+
+	// Check if the last token is a newline, if not, add one
+	tokens := hclFile.Bytes()
+	if len(tokens) > 0 && tokens[len(tokens)-1] != '\n' {
+		hclFile.Body().AppendNewline()
+	}
+
+	// Append the new cluster block to the existing content
+	clusterBlock := hclFile.Body().AppendNewBlock("cluster", []string{cluster})
+	clusterBody := clusterBlock.Body()
+	clusterBody.SetAttributeValue("address", cty.StringVal(addr))
+	if token != "" {
+		clusterBody.SetAttributeValue("token", cty.StringVal(token))
+	}
+	if namespace != "" {
+		clusterBody.SetAttributeValue("namespace", cty.StringVal(namespace))
+	}
+	if region != "" {
+		clusterBody.SetAttributeValue("region", cty.StringVal(region))
+	}
+	if authMethod != "" {
+		authBlock := clusterBody.AppendNewBlock("auth", nil)
+		authBody := authBlock.Body()
+		authBody.SetAttributeValue("method", cty.StringVal(authMethod))
+		authBody.SetAttributeValue("provider", cty.StringVal("nomad"))
+	}
+
+	// Format the HCL file before writing
+	formattedBytes := hclwrite.Format(hclFile.Bytes())
+
+	// Write the updated config back to the file
+	err = os.WriteFile(defaultConfigFilePath, formattedBytes, 0644)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

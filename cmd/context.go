@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -21,7 +20,7 @@ func persistContext(context ContextCfg) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(contextFilePath, []byte(contextFileContent), 0644); err != nil {
+	if err := os.WriteFile(contextFilePath, []byte(contextFileContent), 0644); err != nil {
 		return err
 	}
 

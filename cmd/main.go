@@ -121,6 +121,39 @@ func main() {
 				},
 				Action: handleLogin,
 			},
+			{
+				Name:  "add-cluster",
+				Usage: "Add a new cluster to the config",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "cluster",
+						Required: true,
+						Usage:    "Name of the cluster",
+					},
+					&cli.StringFlag{
+						Name:     "addr",
+						Required: true,
+						Usage:    "Address of the cluster",
+					},
+					&cli.StringFlag{
+						Name:  "token",
+						Usage: "Token for the cluster",
+					},
+					&cli.StringFlag{
+						Name:  "namespace",
+						Usage: "Namespace for the cluster",
+					},
+					&cli.StringFlag{
+						Name:  "region",
+						Usage: "Region of the cluster",
+					},
+					&cli.StringFlag{
+						Name:  "auth-method",
+						Usage: "Auth method for the cluster",
+					},
+				},
+				Action: handleAddCluster,
+			},
 		},
 		Version: buildString,
 	}

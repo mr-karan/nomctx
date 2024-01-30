@@ -31,10 +31,10 @@ NAME:
    nomctx - Faster way to switch across multiple Nomad clusters and namespaces
 
 USAGE:
-   nomctx [global options] command [command options] [arguments...]
+   nomctx [global options] command [command options] 
 
 VERSION:
-   v0.1.1 (Commit: 2023-01-30 08:34:52 +0530 (844bef4), Build: 2023-05-25% 09:57:59 +0530)
+   v0.2.3 (Commit: 2023-12-05 13:09:16 +0530 (ff9fe08), Build: 2024-01-30 21:06:48 +0530)
 
 COMMANDS:
    list-clusters     List all clusters
@@ -45,10 +45,11 @@ COMMANDS:
    switch-namespace  Switch namespace
    current-context   Display the current context
    login             Login to a cluster
+   add-cluster       Add a new cluster to the config
    help, h           Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --config value  Path to a config file to load. (default: "/home/karan/.nomctx/config.hcl")
+   --config value  Path to a config file to load. (default: "/Users/karan/.nomctx/config.hcl")
    --help, -h      show help
    --version, -v   print the version
 ```
@@ -83,6 +84,12 @@ See [Persist variables](#persist-variables) section for more details on how to p
 ### Non Interactive Mode
 
 If you don't have `fzf`, you can use switch manually with `set-cluster=<>` and `set-namespace=<>` commands.
+
+#### Add a Cluster
+
+```bash
+nomctx add-cluster --cluster=<name> [--addr=<address>] [--token=<token>] [--namespace=<namespace>] [--region=<region>] [--auth-method=<method>]
+```
 
 #### List all clusters
 
@@ -167,7 +174,7 @@ NOMAD_REGION=paris
 Here's a sample config file which shows 2 clusters: `dev` and `prod`:
 
 ```hcl
-clusters "dev" {
+cluster "dev" {
   address   = "http://127.0.0.1:4646"
   namespace = "default"
 }
@@ -180,7 +187,7 @@ cluster "uat" {
   }
 }
 
-clusters "prod" {
+cluster "prod" {
   address   = "http://10.0.0.3:4646"
   namespace = "blue"
   region    = "blr"
