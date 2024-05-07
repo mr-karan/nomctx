@@ -109,7 +109,7 @@ default
 #### Set a cluster
 
 ```bash
-nomctx set-cluster=bangalore
+nomctx set-cluster bangalore
 export NOMAD_ADDR=http://10.0.0.1:4646
 export NOMAD_TOKEN=f8cb5774-749a-4548-acc9-054df3b52e83
 export NOMAD_HTTP_AUTH=user:pass
