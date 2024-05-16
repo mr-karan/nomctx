@@ -7,7 +7,7 @@ BUILDSTR := ${VERSION} (Commit: ${LAST_COMMIT_DATE} (${LAST_COMMIT}), Build: $(s
 
 .PHONY: build
 build: ## Build binary.
-	go build -o ${APP-BIN} -ldflags="-X 'main.buildString=${BUILDSTR}'" ./cmd/
+	go build -o ${APP-BIN} -ldflags="-X 'main.buildString=${BUILDSTR}'" ./
 
 .PHONY: run
 run: ## Run binary.
