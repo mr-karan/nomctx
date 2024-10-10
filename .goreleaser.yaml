@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -17,8 +19,7 @@ builds:
     dir: ./
 
 archives:
-  - rlcp: true
-    format: tar.gz
+  - format: tar.gz
     files:
       - README.md
       - LICENSE
@@ -46,7 +47,31 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
-# The lines beneath this are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/use them.
+
+aurs:
+  - name: nomctx-bin
+    homepage: "https://github.com/mr-karan/nomctx"
+    description: "Faster way to switch between clusters and namespaces in nomad"
+    maintainers:
+      - "Karan Sharma <hello@mrkaran.dev>"
+    license: "MIT"
+    private_key: "{{ .Env.AUR_PRIVATE_KEY }}"
+    git_url: "ssh://aur@aur.archlinux.org/nomctx-bin.git"
+    package: |
+      # bin
+      install -Dm755 "./nomctx" "${pkgdir}/usr/bin/nomctx"
+      
+      # license
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/nomctx/LICENSE"
+      
+      # readme
+      install -Dm644 "./README.md" "${pkgdir}/usr/share/doc/nomctx/README.md"
+      
+      # config sample
+      install -Dm644 "./config.sample.hcl" "${pkgdir}/usr/share/doc/nomctx/config.sample.hcl"
+    commit_author:
+      name: goreleaserbot
+      email: goreleaser@example.com
+
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
