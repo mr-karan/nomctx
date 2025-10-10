@@ -14,6 +14,8 @@ If you're operating multiple Nomad clusters, switching between these clusters is
 
 - Binaries: [Releases](https://github.com/mr-karan/nomctx/releases).
 - Go: `go install github.com/mr-karan/nomctx@latest`
+- Nix: `nix profile install github:mr-karan/nomctx`
+- NixOS: See [NixOS Configuration](#nixos-configuration) below
 
 To run:
 
@@ -21,7 +23,48 @@ To run:
 $ nomctx
 ```
 
-By default `nomctx` searches for the file in `~/.nomctx/config.hcl` but you can override that with `--config=</path/to/config.hcl>` flag.
+By default `nomctx` searches for the file in `~/.config/nomctx/config.hcl` but you can override that with `--config=</path/to/config.hcl>` flag.
+
+### NixOS Configuration
+
+You can use the NixOS module to declaratively configure nomctx clusters:
+
+```nix
+{
+  inputs.nomctx.url = "github:mr-karan/nomctx";
+
+  outputs = { self, nixpkgs, nomctx }: {
+    nixosConfigurations.yourhostname = nixpkgs.lib.nixosSystem {
+      modules = [
+        nomctx.nixosModules.default
+        {
+          programs.nomctx = {
+            enable = true;
+            clusters = {
+              local = {
+                address = "http://127.0.0.1:4646";
+                namespace = "default";
+              };
+              prod = {
+                address = "http://10.0.0.3:4646";
+                namespace = "blue";
+                token = "your-token-here";
+              };
+              bangalore = {
+                address = "https://nomad.hashicorp.rocks";
+                auth = {
+                  method = "gitlab";
+                  provider = "nomad";
+                };
+              };
+            };
+          };
+        }
+      ];
+    };
+  };
+}
+```
 
 
 ## Usage

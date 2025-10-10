@@ -7,6 +7,10 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
+    {
+      nixosModules.default = import ./nixos-module.nix;
+      nixosModules.nomctx = import ./nixos-module.nix;
+    } //
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};

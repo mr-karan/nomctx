@@ -9,7 +9,7 @@ buildGoModule rec {
 
   src = ./.;
 
-  vendorHash = null;
+  vendorHash = "sha256-9XyQGqLcvBNC/EuweehHQheAcbTNqtdmu0KScNNfoLw=";
 
   ldflags = [ "-s" "-w" ];
 
