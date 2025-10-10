@@ -42,7 +42,7 @@ func getFilePathInHomeDir(fileName string) (string, error) {
 		return "", err
 	}
 	// Construct the full path of the file.
-	return filepath.Join(homeDir, ".nomctx", fileName), nil
+	return filepath.Join(homeDir, ".config", "nomctx", fileName), nil
 }
 
 // sanitizeFilename cleans up string to be used as a safe filename.

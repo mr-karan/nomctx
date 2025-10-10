@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
 
-// persistContext writes the current context to ~/.nomctx/context.hcl.
+// persistContext writes the current context to ~/.config/nomctx/context.hcl.
 func persistContext(context ContextCfg) error {
 	contextFilePath, err := getFilePathInHomeDir("context.hcl")
 	if err != nil {
@@ -27,7 +27,7 @@ func persistContext(context ContextCfg) error {
 	return nil
 }
 
-// loadContext reads the current context from ~/.nomctx/context.hcl.
+// loadContext reads the current context from ~/.config/nomctx/context.hcl.
 func loadContext() (ContextCfg, error) {
 	contextFilePath, err := getFilePathInHomeDir("context.hcl")
 	if err != nil {
