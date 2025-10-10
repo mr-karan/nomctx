@@ -15,7 +15,6 @@ If you're operating multiple Nomad clusters, switching between these clusters is
 - Binaries: [Releases](https://github.com/mr-karan/nomctx/releases).
 - Go: `go install github.com/mr-karan/nomctx@latest`
 - Nix: `nix profile install github:mr-karan/nomctx`
-- NixOS: See [NixOS Configuration](#nixos-configuration) below
 
 To run:
 
@@ -24,77 +23,6 @@ $ nomctx
 ```
 
 By default `nomctx` searches for the file in `~/.config/nomctx/config.hcl` but you can override that with `--config=</path/to/config.hcl>` flag.
-
-### NixOS Configuration
-
-#### System-wide (NixOS module)
-
-For system-wide configuration (available to all users):
-
-```nix
-{
-  inputs.nomctx.url = "github:mr-karan/nomctx";
-
-  outputs = { self, nixpkgs, nomctx }: {
-    nixosConfigurations.yourhostname = nixpkgs.lib.nixosSystem {
-      modules = [
-        nomctx.nixosModules.default
-        {
-          programs.nomctx = {
-            enable = true;
-            clusters = {
-              local = {
-                address = "http://127.0.0.1:4646";
-                namespace = "default";
-              };
-              prod = {
-                address = "http://10.0.0.3:4646";
-                namespace = "blue";
-                token = "your-token-here";
-              };
-            };
-          };
-        }
-      ];
-    };
-  };
-}
-```
-
-#### Per-user (Home Manager module)
-
-For per-user configuration (recommended for personal machines):
-
-```nix
-{
-  inputs.nomctx.url = "github:mr-karan/nomctx";
-  inputs.home-manager.url = "github:nix-community/home-manager";
-
-  outputs = { self, nixpkgs, home-manager, nomctx }: {
-    homeConfigurations.yourusername = home-manager.lib.homeManagerConfiguration {
-      modules = [
-        nomctx.homeManagerModules.default
-        {
-          programs.nomctx = {
-            enable = true;
-            clusters = {
-              local = {
-                address = "http://127.0.0.1:4646";
-                namespace = "default";
-              };
-              prod = {
-                address = "http://10.0.0.3:4646";
-                namespace = "blue";
-                token = "your-token-here";
-              };
-            };
-          };
-        }
-      ];
-    };
-  };
-}
-```
 
 
 ## Usage
