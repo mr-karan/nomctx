@@ -10,6 +10,9 @@
     {
       nixosModules.default = import ./nixos-module.nix;
       nixosModules.nomctx = import ./nixos-module.nix;
+
+      homeManagerModules.default = import ./home-manager-module.nix;
+      homeManagerModules.nomctx = import ./home-manager-module.nix;
     } //
     flake-utils.lib.eachDefaultSystem (system:
       let

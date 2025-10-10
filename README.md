@@ -27,7 +27,9 @@ By default `nomctx` searches for the file in `~/.config/nomctx/config.hcl` but y
 
 ### NixOS Configuration
 
-You can use the NixOS module to declaratively configure nomctx clusters:
+#### System-wide (NixOS module)
+
+For system-wide configuration (available to all users):
 
 ```nix
 {
@@ -50,12 +52,40 @@ You can use the NixOS module to declaratively configure nomctx clusters:
                 namespace = "blue";
                 token = "your-token-here";
               };
-              bangalore = {
-                address = "https://nomad.hashicorp.rocks";
-                auth = {
-                  method = "gitlab";
-                  provider = "nomad";
-                };
+            };
+          };
+        }
+      ];
+    };
+  };
+}
+```
+
+#### Per-user (Home Manager module)
+
+For per-user configuration (recommended for personal machines):
+
+```nix
+{
+  inputs.nomctx.url = "github:mr-karan/nomctx";
+  inputs.home-manager.url = "github:nix-community/home-manager";
+
+  outputs = { self, nixpkgs, home-manager, nomctx }: {
+    homeConfigurations.yourusername = home-manager.lib.homeManagerConfiguration {
+      modules = [
+        nomctx.homeManagerModules.default
+        {
+          programs.nomctx = {
+            enable = true;
+            clusters = {
+              local = {
+                address = "http://127.0.0.1:4646";
+                namespace = "default";
+              };
+              prod = {
+                address = "http://10.0.0.3:4646";
+                namespace = "blue";
+                token = "your-token-here";
               };
             };
           };
