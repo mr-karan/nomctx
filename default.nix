@@ -15,7 +15,7 @@ buildGoModule rec {
 
   meta = with lib; {
     description = "Fast context switching for Nomad";
-    homepage = "https://github.com/karancode/nomctx";
+    homepage = "https://github.com/mr-karan/nomctx";
     license = licenses.mit;
     maintainers = [ ];
     mainProgram = "nomctx";
