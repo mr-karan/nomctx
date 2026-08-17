@@ -50,7 +50,7 @@ COMMANDS:
    help, h           Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --config value  Path to a config file to load. (default: "/home/karan/.config/nomctx/config.hcl")
+   --config value  Path to a config file to load. (default: "~/.config/nomctx/config.hcl")
    --help, -h      show help
    --version, -v   print the version
 ```
