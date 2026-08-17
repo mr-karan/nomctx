@@ -70,7 +70,7 @@ func exportClusterVars(c ClusterCfg, out io.Writer) {
 
 // persistClusterVars writes the cluster variables to a file
 func persistClusterVars(c ClusterCfg, path string) error {
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}

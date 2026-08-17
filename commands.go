@@ -268,7 +268,7 @@ func handleAddCluster(c *cli.Context) error {
 	formattedBytes := hclwrite.Format(hclFile.Bytes())
 
 	// Write the updated config back to the file
-	err = os.WriteFile(defaultConfigFilePath, formattedBytes, 0644)
+	err = os.WriteFile(defaultConfigFilePath, formattedBytes, 0600)
 	if err != nil {
 		return err
 	}
