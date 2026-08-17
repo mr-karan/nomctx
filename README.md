@@ -50,7 +50,7 @@ COMMANDS:
    help, h           Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --config value  Path to a config file to load. (default: "/Users/karan/.nomctx/config.hcl")
+   --config value  Path to a config file to load. (default: "/home/karan/.config/nomctx/config.hcl")
    --help, -h      show help
    --version, -v   print the version
 ```
@@ -76,7 +76,7 @@ nomctx login
 # or specify a cluster
 nomctx login --cluster=dev
 
-# Persist the session token to a file in `~/.nomctx/<cluster>.env`
+# Persist the session token to a file in `~/.config/nomctx/<cluster>.env`
 nomctx login --cluster=dev --persist
 ```
 
@@ -160,19 +160,19 @@ nomctx add-cluster --cluster="my-cluster" --addr="http://10.0.0.5:4646" --token=
 ```
 
 #### Notes
-- The new cluster configuration is appended to the existing `~/.nomctx/config.hcl` file.
+- The new cluster configuration is appended to the existing `~/.config/nomctx/config.hcl` file.
 - Ensure the cluster name is unique to avoid conflicts in the configuration.
 
 ### Persist variables
 
 With `--persist` flag, you can persist the environment variables to a file. This is useful if you want to use the variables in a script.
-The variables are written to `~/.nomctx/<cluster>.env` file.
+The variables are written to `~/.config/nomctx/<cluster>.env` file.
 
 ```bash
 nomctx set-cluster --persist dev
 
 # You can see the env variables are written to the file.
-cat ~/.nomctx/dev.env
+cat ~/.config/nomctx/dev.env
 NOMAD_ADDR=http://127.0.0.1:4646
 NOMAD_NAMESPACE=default
 ```
